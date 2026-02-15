@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: stg
+
+logging:
+  level:
+    root: warn
+    org.springframework.security: warn
