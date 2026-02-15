@@ -3,7 +3,7 @@ package com.epam.infrastructure.repository;
 import com.epam.infrastructure.daos.TrainerSummaryDao;
 import com.epam.infrastructure.enums.TrainerStatus;
 import com.epam.infrastructure.mappers.TrainerMapper;
-import com.epam.infrastructure.persistence.TrainerComponent;
+import com.epam.infrastructure.persistence.TrainerJpaRepository;
 import com.epam.model.TrainerSummary;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -33,7 +33,7 @@ class TrainerRepositoryImplTest {
     TrainerRepositoryImpl trainerRepository;
 
     @Autowired
-    TrainerComponent trainerComponent;
+    TrainerJpaRepository trainerJpaRepository;
 
     @TestConfiguration
     static class MapperTestConfig {
@@ -52,7 +52,7 @@ class TrainerRepositoryImplTest {
         dao.setLastName("One");
         dao.setStatus(TrainerStatus.ACTIVE);
         dao.setActive(true);
-        dao = trainerComponent.saveAndFlush(dao);
+        dao = trainerJpaRepository.saveAndFlush(dao);
 
         // when
         Optional<TrainerSummary> found = trainerRepository.findByUsername("trainer.one");
@@ -96,7 +96,7 @@ class TrainerRepositoryImplTest {
         assertTrue(saved.getActive());
 
         // and DB state
-        List<TrainerSummaryDao> all = trainerComponent.findAll();
+        List<TrainerSummaryDao> all = trainerJpaRepository.findAll();
         assertEquals(1, all.size());
         assertEquals("trainer.saved", all.getFirst().getUsername());
         assertEquals("Saved", all.getFirst().getFirstName());

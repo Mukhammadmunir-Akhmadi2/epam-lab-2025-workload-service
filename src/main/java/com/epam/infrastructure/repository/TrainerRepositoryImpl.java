@@ -2,7 +2,7 @@ package com.epam.infrastructure.repository;
 
 import com.epam.application.repository.TrainerRepository;
 import com.epam.infrastructure.mappers.TrainerMapper;
-import com.epam.infrastructure.persistence.TrainerComponent;
+import com.epam.infrastructure.persistence.TrainerJpaRepository;
 import com.epam.model.TrainerSummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TrainerRepositoryImpl implements TrainerRepository {
 
-    private final TrainerComponent jpaRepo;
+    private final TrainerJpaRepository jpaRepo;
     private final TrainerMapper mapper;
 
     @Override

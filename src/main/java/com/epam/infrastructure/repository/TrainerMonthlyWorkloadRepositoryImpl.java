@@ -3,7 +3,7 @@ package com.epam.infrastructure.repository;
 import com.epam.application.repository.TrainerMonthlyWorkloadRepository;
 import com.epam.infrastructure.mappers.TrainerMapper;
 import com.epam.infrastructure.mappers.TrainerMonthlyWorkloadMapper;
-import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadComponent;
+import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadJpaRepository;
 import com.epam.model.TrainerMonthlyWorkload;
 import com.epam.model.TrainerSummary;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TrainerMonthlyWorkloadRepositoryImpl implements TrainerMonthlyWorkloadRepository {
 
-    private final TrainerMonthlyWorkloadComponent jpaRepo;
+    private final TrainerMonthlyWorkloadJpaRepository jpaRepo;
     private final TrainerMonthlyWorkloadMapper monthlyMapper;
     private final TrainerMapper trainerMapper;
 

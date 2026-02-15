@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TrainerComponent extends JpaRepository<TrainerSummaryDao, UUID> {
+public interface TrainerJpaRepository extends JpaRepository<TrainerSummaryDao, UUID> {
     Optional<TrainerSummaryDao> findByUsername(String username);
 }

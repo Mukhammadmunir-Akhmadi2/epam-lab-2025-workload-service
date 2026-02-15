@@ -3,8 +3,8 @@ package com.epam.infrastructure.persistance;
 import com.epam.infrastructure.daos.TrainerMonthlyWorkloadDao;
 import com.epam.infrastructure.daos.TrainerSummaryDao;
 import com.epam.infrastructure.enums.TrainerStatus;
-import com.epam.infrastructure.persistence.TrainerComponent;
-import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadComponent;
+import com.epam.infrastructure.persistence.TrainerJpaRepository;
+import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -17,13 +17,13 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class TrainerMonthlyWorkloadComponentTest {
+class TrainerMonthlyWorkloadJpaRepositoryTest {
 
     @Autowired
-    private TrainerComponent trainerComponent;
+    private TrainerJpaRepository trainerJpaRepository;
 
     @Autowired
-    private TrainerMonthlyWorkloadComponent monthlyComponent;
+    private TrainerMonthlyWorkloadJpaRepository monthlyComponent;
 
     @Test
     void findAllByTrainer_returnsAllMonthlyRows_forTrainer() {
@@ -34,7 +34,7 @@ class TrainerMonthlyWorkloadComponentTest {
         trainer.setStatus(TrainerStatus.ACTIVE);
         trainer.setActive(true);
 
-        trainer = trainerComponent.saveAndFlush(trainer);
+        trainer = trainerJpaRepository.saveAndFlush(trainer);
 
         TrainerMonthlyWorkloadDao jan = new TrainerMonthlyWorkloadDao();
         jan.setTrainer(trainer);
@@ -67,7 +67,7 @@ class TrainerMonthlyWorkloadComponentTest {
         trainer.setStatus(TrainerStatus.ACTIVE);
         trainer.setActive(true);
 
-        trainer = trainerComponent.saveAndFlush(trainer);
+        trainer = trainerJpaRepository.saveAndFlush(trainer);
 
         TrainerMonthlyWorkloadDao row = new TrainerMonthlyWorkloadDao();
         row.setTrainer(trainer);

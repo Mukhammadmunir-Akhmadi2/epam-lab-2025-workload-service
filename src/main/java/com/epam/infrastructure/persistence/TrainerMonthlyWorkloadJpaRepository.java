@@ -10,9 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TrainerMonthlyWorkloadComponent extends JpaRepository<TrainerMonthlyWorkloadDao, UUID> {
+public interface TrainerMonthlyWorkloadJpaRepository extends JpaRepository<TrainerMonthlyWorkloadDao, UUID> {
     List<TrainerMonthlyWorkloadDao> findAllByTrainer(TrainerSummaryDao trainer);
 
     Optional<TrainerMonthlyWorkloadDao> findByTrainerAndYearAndMonth(TrainerSummaryDao trainer, int year, int month);
-
 }

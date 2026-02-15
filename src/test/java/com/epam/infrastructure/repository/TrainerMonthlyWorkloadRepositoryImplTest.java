@@ -5,8 +5,8 @@ import com.epam.infrastructure.daos.TrainerSummaryDao;
 import com.epam.infrastructure.enums.TrainerStatus;
 import com.epam.infrastructure.mappers.TrainerMapper;
 import com.epam.infrastructure.mappers.TrainerMonthlyWorkloadMapper;
-import com.epam.infrastructure.persistence.TrainerComponent;
-import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadComponent;
+import com.epam.infrastructure.persistence.TrainerJpaRepository;
+import com.epam.infrastructure.persistence.TrainerMonthlyWorkloadJpaRepository;
 import com.epam.model.TrainerMonthlyWorkload;
 import com.epam.model.TrainerSummary;
 import org.junit.jupiter.api.Test;
@@ -36,9 +36,10 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
     TrainerMonthlyWorkloadRepositoryImpl monthlyRepository;
     @Autowired TrainerRepositoryImpl trainerRepository;
 
-    @Autowired TrainerMonthlyWorkloadComponent monthlyComponent;
     @Autowired
-    TrainerComponent trainerComponent;
+    TrainerMonthlyWorkloadJpaRepository monthlyComponent;
+    @Autowired
+    TrainerJpaRepository trainerJpaRepository;
 
     @TestConfiguration
     static class MapperTestConfig {
@@ -63,7 +64,7 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
         trainerDao.setLastName("One");
         trainerDao.setStatus(TrainerStatus.ACTIVE);
         trainerDao.setActive(true);
-        trainerDao = trainerComponent.saveAndFlush(trainerDao);
+        trainerDao = trainerJpaRepository.saveAndFlush(trainerDao);
 
         // create monthly rows in DB
         TrainerMonthlyWorkloadDao jan = new TrainerMonthlyWorkloadDao();
@@ -107,7 +108,7 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
         trainerDao.setLastName("Trainer");
         trainerDao.setStatus(TrainerStatus.ACTIVE);
         trainerDao.setActive(true);
-        trainerDao = trainerComponent.saveAndFlush(trainerDao);
+        trainerDao = trainerJpaRepository.saveAndFlush(trainerDao);
 
         TrainerSummary trainerModel = new TrainerSummary();
         trainerModel.setTrainerId(trainerDao.getTrainerId().toString());
@@ -127,7 +128,7 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
         trainerDao.setLastName("Two");
         trainerDao.setStatus(TrainerStatus.ACTIVE);
         trainerDao.setActive(true);
-        trainerDao = trainerComponent.saveAndFlush(trainerDao);
+        trainerDao = trainerJpaRepository.saveAndFlush(trainerDao);
 
         TrainerMonthlyWorkloadDao row = new TrainerMonthlyWorkloadDao();
         row.setTrainer(trainerDao);
@@ -163,7 +164,7 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
         trainerDao.setLastName("Three");
         trainerDao.setStatus(TrainerStatus.ACTIVE);
         trainerDao.setActive(true);
-        trainerDao = trainerComponent.saveAndFlush(trainerDao);
+        trainerDao = trainerJpaRepository.saveAndFlush(trainerDao);
 
         // note: no monthly rows inserted
 
@@ -186,7 +187,7 @@ class TrainerMonthlyWorkloadRepositoryImplTest {
         trainerDao.setLastName("Trainer");
         trainerDao.setStatus(TrainerStatus.ACTIVE);
         trainerDao.setActive(true);
-        trainerDao = trainerComponent.saveAndFlush(trainerDao);
+        trainerDao = trainerJpaRepository.saveAndFlush(trainerDao);
 
         TrainerSummary trainerModel = new TrainerSummary();
         trainerModel.setTrainerId(trainerDao.getTrainerId().toString());
