@@ -20,12 +20,15 @@ management:
     enable:
       all: true
 
-
 app:
   security:
     jwt:
       secret: eddbf3734b12a8e8d1e9b0f3311e076d4d0b835cf83f0e416cc0ca2e591029a09e723b610292b9c9a15c0b3daceba87969659cdfac39223247f91315997ab9fecc5424d8bad42bd2fee347c438fee3a831e55dbda99ef00c9432a1b78768f37946102cb3cd2dd2f3ce31f67f719ab48fbd00c3076a84dfc2b742940f8adde27f4e0471476d06ba96ed6294a1cb7b2ecab730b3eb0e02e4b6670b0f8ef322251eec2d1df8bd2e36f4e7d61f6dd9aa59026d333dc43e6b6b05279b7015b29520130a6f7155a8715b2c667ec8c96e0fed2754fa261de1ae80fe4e822e3c8ec481dc41b18eaa9d9cb94adcf83938c34c4091abe13e785367aca26d1e7810ca5ee70f
       expiration-hours: 2
+  kafka:
+    topics:
+      workload-events: trainer.workload.events
+      workload-events-dlq: trainer.workload.events.dlq
 
 server:
   port: 0
@@ -33,6 +36,23 @@ server:
 spring:
   application:
     name: workload-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: workload-service
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.add.type.headers: false
+        spring.json.trusted.packages: com.epam.infrastructure.dtos
+        spring.json.value.default.type: com.epam.infrastructure.dtos.TrainerWorkloadRequestDto
+        partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+    listener:
+      ack-mode: record
 
 eureka:
   client:
