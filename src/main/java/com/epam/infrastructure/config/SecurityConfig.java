@@ -36,7 +36,6 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/workload-events").hasAuthority("SYSTEM")
                         .requestMatchers(HttpMethod.GET, "/trainers/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )

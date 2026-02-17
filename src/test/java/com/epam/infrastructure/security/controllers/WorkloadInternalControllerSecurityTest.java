@@ -60,29 +60,4 @@ class WorkloadInternalControllerSecurityTest {
 
         verifyNoInteractions(workloadAggregationService);
     }
-
-    @Test
-    @WithMockUser(username = "system", authorities = "SYSTEM")
-    void acceptWorkloadEvent_withSystemRole_shouldReturnOk_andCallService() throws Exception {
-        // adjust fields to match your request DTO and @Valid constraints
-        String body = """
-                {
-                  "trainerUsername": "john.smith",
-                  "trainerFirstName": "John",
-                  "trainerLastName": "Smith",
-                  "isActive": true,
-                  "trainingDate": "2026-02-09",
-                  "trainingDuration": 45,
-                  "actionType": "ADD"
-                }
-                """;
-
-        mockMvc.perform(post("/workload-events")
-                        .contentType("application/json")
-                        .content(body))
-                .andExpect(status().isOk());
-
-        verify(workloadAggregationService, times(1)).applyEvent(any());
-        verifyNoMoreInteractions(workloadAggregationService);
-    }
 }

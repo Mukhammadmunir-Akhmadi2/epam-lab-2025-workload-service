@@ -9,6 +9,7 @@ import com.epam.model.TrainerMonthlyWorkload;
 import com.epam.model.TrainerSummary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class WorkloadAggregationServiceImpl implements WorkloadAggregationServic
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('SYSTEM')")
     public void applyEvent(TrainerWorkloadRequestDto req) {
         TrainerSummary trainer = trainerRepository.findByUsername(req.getTrainerUsername())
                 .orElseGet(() -> {
