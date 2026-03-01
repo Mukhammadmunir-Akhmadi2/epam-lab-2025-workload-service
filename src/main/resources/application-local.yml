@@ -2,16 +2,15 @@ spring:
   config:
     activate:
       on-profile: local
-  datasource:
-    url: jdbc:postgresql://localhost:5432/gym_workload_db
-    username: postgres
-    password: 4999
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
+  data:
+    mongodb:
+      auto-index-creation: true
+  mongodb:
+    uri: mongodb://localhost
+    port: 27017
+    database: gym_workload_db
+    representation:
+      uuid: standard
 
 logging:
   level:

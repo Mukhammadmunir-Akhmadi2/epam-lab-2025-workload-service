@@ -1,7 +1,7 @@
 package com.epam.application.services;
 
-import com.epam.infrastructure.dtos.TrainerMonthlySummaryResponseDto;
+import com.epam.model.TrainerTrainingSummary;
 
 public interface WorkloadQueryService {
-    TrainerMonthlySummaryResponseDto getSummary(String username);
+    TrainerTrainingSummary getSummary(String username);
 }
