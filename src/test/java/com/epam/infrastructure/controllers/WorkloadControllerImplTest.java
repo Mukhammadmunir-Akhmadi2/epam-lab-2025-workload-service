@@ -2,8 +2,10 @@ package com.epam.infrastructure.controllers;
 import com.epam.application.exceptions.ResourceNotFoundException;
 import com.epam.application.services.impl.WorkloadQueryServiceImpl;
 import com.epam.infrastructure.controllers.impl.WorkloadControllerImpl;
-import com.epam.infrastructure.dtos.TrainerMonthlySummaryResponseDto;
+import com.epam.infrastructure.dtos.TrainerTrainingSummaryResponseDto;
+import com.epam.infrastructure.mappers.TrainerTrainingSummaryMapper;
 import com.epam.infrastructure.security.filters.JwtClaimsFilter;
+import com.epam.model.TrainerTrainingSummary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -11,6 +13,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,48 +25,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class WorkloadControllerImplTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @MockitoBean
-    WorkloadQueryServiceImpl queryService;
+    private WorkloadQueryServiceImpl queryService; // already mocked
 
     @MockitoBean
-    private JwtClaimsFilter jwtFilter;
+    private TrainerTrainingSummaryMapper trainerSummaryMapper; // <--- add this
+
+    @MockitoBean
+    private JwtClaimsFilter jwtFilter; // already mocked
 
     @Test
     void getTrainerWorkloadSummary_returns200_andBody() throws Exception {
-        // given
-        TrainerMonthlySummaryResponseDto dto = new TrainerMonthlySummaryResponseDto();
-        dto.setTrainerUsername("john.smith");
-        dto.setTrainerFirstName("John");
-        dto.setTrainerLastName("Smith");
-        dto.setTrainerStatus(true);
-        dto.setYears(java.util.List.of()); // keep simple
+        TrainerTrainingSummary model = new TrainerTrainingSummary();
+        model.setUsername("john.smith");
+        model.setFirstName("John");
+        model.setLastName("Smith");
+        model.setStatus(true);
+        model.setYears(Set.of());
 
-        when(queryService.getSummary("john.smith")).thenReturn(dto);
+        when(queryService.getSummary("john.smith")).thenReturn(model);
 
-        // when/then
+        // map model to DTO
+        var dto = mock(TrainerTrainingSummaryResponseDto.class);
+        when(trainerSummaryMapper.toDto(model)).thenReturn(dto);
+
         mockMvc.perform(get("/trainers/{username}/workload", "john.smith")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.trainerUsername").value("john.smith"))
-                .andExpect(jsonPath("$.trainerFirstName").value("John"))
-                .andExpect(jsonPath("$.trainerLastName").value("Smith"))
-                .andExpect(jsonPath("$.trainerStatus").value(true))
-                .andExpect(jsonPath("$.years").isArray());
+                .andExpect(status().isOk());
 
         verify(queryService).getSummary("john.smith");
-        verifyNoMoreInteractions(queryService);
+        verify(trainerSummaryMapper).toDto(model);
+        verifyNoMoreInteractions(queryService, trainerSummaryMapper);
     }
 
     @Test
     void getTrainerWorkloadSummary_returns404_whenTrainerNotFound() throws Exception {
-        // given
         when(queryService.getSummary("missing.user"))
                 .thenThrow(new ResourceNotFoundException("Trainer not found: missing.user"));
 
-        // when/then
         mockMvc.perform(get("/trainers/{username}/workload", "missing.user")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());

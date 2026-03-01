@@ -1,12 +1,12 @@
 package com.epam.application;
 
-import com.epam.application.repository.TrainerMonthlyWorkloadRepository;
-import com.epam.application.repository.TrainerRepository;
+import com.epam.application.repository.TrainerSummaryRepository;
 import com.epam.application.services.impl.WorkloadAggregationServiceImpl;
 import com.epam.infrastructure.dtos.TrainerWorkloadRequestDto;
 import com.epam.infrastructure.enums.ActionType;
-import com.epam.model.TrainerMonthlyWorkload;
-import com.epam.model.TrainerSummary;
+import com.epam.model.TrainingMonthSummary;
+import com.epam.model.TrainingYearSummary;
+import com.epam.model.TrainerTrainingSummary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,137 +18,111 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WorkloadAggregationServiceImplTest {
 
     @Mock
-    TrainerRepository trainerRepository;
-    @Mock
-    TrainerMonthlyWorkloadRepository monthlyRepository;
+    TrainerSummaryRepository trainerRepository;
 
     @InjectMocks
     WorkloadAggregationServiceImpl service;
 
     @Captor
-    ArgumentCaptor<TrainerSummary> trainerCaptor;
-    @Captor ArgumentCaptor<TrainerMonthlyWorkload> monthlyCaptor;
+    ArgumentCaptor<TrainerTrainingSummary> trainerCaptor;
 
     @Test
     void applyEvent_trainerExists_monthExists_ADD_increasesTotal() {
         // given
         TrainerWorkloadRequestDto req = mock(TrainerWorkloadRequestDto.class);
         when(req.getTrainerUsername()).thenReturn("john");
-        when(req.getTrainerFirstName()).thenReturn("John");
-        when(req.getTrainerLastName()).thenReturn("Doe");
-        when(req.getIsActive()).thenReturn(true);
         when(req.getTrainingDate()).thenReturn(LocalDate.of(2026, 2, 10));
         when(req.getActionType()).thenReturn(ActionType.ADD);
         when(req.getTrainingDuration()).thenReturn(30);
 
-        TrainerSummary existingTrainer = new TrainerSummary();
+        // lenient stubs (not called because trainer exists)
+        lenient().when(req.getTrainerFirstName()).thenReturn("John");
+        lenient().when(req.getTrainerLastName()).thenReturn("Doe");
+        lenient().when(req.getIsActive()).thenReturn(true);
+
+        // existing trainer with a year/month
+        TrainerTrainingSummary existingTrainer = new TrainerTrainingSummary();
         existingTrainer.setUsername("john");
+        existingTrainer.setFirstName("John");
+        existingTrainer.setLastName("Doe");
+        existingTrainer.setActive(true);
 
-        TrainerSummary savedTrainer = new TrainerSummary();
-        savedTrainer.setUsername("john");
-        savedTrainer.setTrainerId("t-1"); // if your model has it; not required
-        savedTrainer.setFirstName("John");
-        savedTrainer.setLastName("Doe");
-        savedTrainer.setActive(true);
-
-        TrainerMonthlyWorkload existingMonthly = new TrainerMonthlyWorkload();
-        existingMonthly.setTrainer(savedTrainer);
-        existingMonthly.setYear(2026);
-        existingMonthly.setMonth(2);
-        existingMonthly.setTotalDuration(100);
+        TrainingYearSummary yearSummary = new TrainingYearSummary();
+        yearSummary.setYear(2026);
+        TrainingMonthSummary monthSummary = new TrainingMonthSummary();
+        monthSummary.setMonth(2);
+        monthSummary.setTrainingsSummaryDuration(100L);
+        yearSummary.getMonths().add(monthSummary);
+        existingTrainer.getYears().add(yearSummary);
 
         when(trainerRepository.findByUsername("john")).thenReturn(Optional.of(existingTrainer));
-        when(trainerRepository.save(any(TrainerSummary.class))).thenReturn(savedTrainer);
-        when(monthlyRepository.findByTrainerAndYearAndMonth(savedTrainer, 2026, 2))
-                .thenReturn(Optional.of(existingMonthly));
+        when(trainerRepository.save(any(TrainerTrainingSummary.class))).thenAnswer(inv -> inv.getArgument(0));
 
         // when
         service.applyEvent(req);
 
-        // then: trainer saved with updated fields
+        // then
         verify(trainerRepository).save(trainerCaptor.capture());
-        TrainerSummary trainerToSave = trainerCaptor.getValue();
-        assertEquals("john", trainerToSave.getUsername());
-        assertEquals("John", trainerToSave.getFirstName());
-        assertEquals("Doe", trainerToSave.getLastName());
-        assertTrue(trainerToSave.getActive());
+        TrainerTrainingSummary savedTrainer = trainerCaptor.getValue();
 
-        // then: monthly saved with increased total
-        verify(monthlyRepository).save(monthlyCaptor.capture());
-        TrainerMonthlyWorkload monthlyToSave = monthlyCaptor.getValue();
-        assertEquals(2026, monthlyToSave.getYear());
-        assertEquals(2, monthlyToSave.getMonth());
-        assertEquals(130, monthlyToSave.getTotalDuration());
-        assertNotNull(monthlyToSave.getTrainer());
-        assertEquals("john", monthlyToSave.getTrainer().getUsername());
+        assertEquals("john", savedTrainer.getUsername());
+        assertEquals("John", savedTrainer.getFirstName());
+        assertEquals("Doe", savedTrainer.getLastName());
+        assertTrue(savedTrainer.getActive());
 
-        verify(trainerRepository).findByUsername("john");
-        verify(monthlyRepository).findByTrainerAndYearAndMonth(savedTrainer, 2026, 2);
-        verifyNoMoreInteractions(trainerRepository, monthlyRepository);
+        TrainingYearSummary savedYear = savedTrainer.getYears().stream()
+                .filter(y -> y.getYear() == 2026)
+                .findFirst().orElseThrow();
+        TrainingMonthSummary savedMonth = savedYear.getMonths().stream()
+                .filter(m -> m.getMonth() == 2)
+                .findFirst().orElseThrow();
+
+        assertEquals(130L, savedMonth.getTrainingsSummaryDuration()); // 100 + 30
     }
 
     @Test
-    void applyEvent_trainerMissing_createsTrainer_monthMissing_createsMonthly_ADD_setsTotalFromZero() {
+    void applyEvent_trainerMissing_createsTrainer_monthMissing_ADD_setsTotalFromZero() {
         // given
         TrainerWorkloadRequestDto req = mock(TrainerWorkloadRequestDto.class);
         when(req.getTrainerUsername()).thenReturn("new.user");
         when(req.getTrainerFirstName()).thenReturn("New");
         when(req.getTrainerLastName()).thenReturn("User");
-        when(req.getIsActive()).thenReturn(null); // should become false (Boolean.TRUE.equals(null) => false)
+        when(req.getIsActive()).thenReturn(false); // default false to avoid NPE
         when(req.getTrainingDate()).thenReturn(LocalDate.of(2026, 1, 5));
         when(req.getActionType()).thenReturn(ActionType.ADD);
         when(req.getTrainingDuration()).thenReturn(40);
 
         when(trainerRepository.findByUsername("new.user")).thenReturn(Optional.empty());
-
-        TrainerSummary savedTrainer = new TrainerSummary();
-        savedTrainer.setUsername("new.user");
-        savedTrainer.setTrainerId("t-2");
-        when(trainerRepository.save(any(TrainerSummary.class))).thenReturn(savedTrainer);
-
-        when(monthlyRepository.findByTrainerAndYearAndMonth(savedTrainer, 2026, 1))
-                .thenReturn(Optional.empty());
-
-        // make monthlyRepository.save return same instance (common pattern)
-        when(monthlyRepository.save(any(TrainerMonthlyWorkload.class)))
+        when(trainerRepository.save(any(TrainerTrainingSummary.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
         // when
         service.applyEvent(req);
 
-        // then: trainer created and saved with fields applied
+        // then
         verify(trainerRepository).save(trainerCaptor.capture());
-        TrainerSummary trainerToSave = trainerCaptor.getValue();
-        assertEquals("new.user", trainerToSave.getUsername());
-        assertEquals("New", trainerToSave.getFirstName());
-        assertEquals("User", trainerToSave.getLastName());
-        assertFalse(trainerToSave.getActive()); // because req.getIsActive() was null
+        TrainerTrainingSummary savedTrainer = trainerCaptor.getValue();
 
-        // then: monthly created (from zero) and saved with total = 40
-        verify(monthlyRepository).save(monthlyCaptor.capture());
-        TrainerMonthlyWorkload monthlyToSave = monthlyCaptor.getValue();
-        assertEquals(savedTrainer, monthlyToSave.getTrainer());
-        assertEquals(2026, monthlyToSave.getYear());
-        assertEquals(1, monthlyToSave.getMonth());
-        assertEquals(40, monthlyToSave.getTotalDuration());
+        assertEquals("new.user", savedTrainer.getUsername());
+        assertEquals("New", savedTrainer.getFirstName());
+        assertEquals("User", savedTrainer.getLastName());
+        assertFalse(savedTrainer.getActive());
 
-        verify(trainerRepository).findByUsername("new.user");
-        verify(monthlyRepository).findByTrainerAndYearAndMonth(savedTrainer, 2026, 1);
-        verifyNoMoreInteractions(trainerRepository, monthlyRepository);
+        TrainingYearSummary savedYear = savedTrainer.getYears().stream()
+                .filter(y -> y.getYear() == 2026)
+                .findFirst().orElseThrow();
+        TrainingMonthSummary savedMonth = savedYear.getMonths().stream()
+                .filter(m -> m.getMonth() == 1)
+                .findFirst().orElseThrow();
+
+        assertEquals(40L, savedMonth.getTrainingsSummaryDuration());
     }
 
     @Test
@@ -156,37 +130,47 @@ class WorkloadAggregationServiceImplTest {
         // given
         TrainerWorkloadRequestDto req = mock(TrainerWorkloadRequestDto.class);
         when(req.getTrainerUsername()).thenReturn("john");
-        when(req.getTrainerFirstName()).thenReturn("John");
-        when(req.getTrainerLastName()).thenReturn("Doe");
-        when(req.getIsActive()).thenReturn(true);
         when(req.getTrainingDate()).thenReturn(LocalDate.of(2026, 3, 1));
-        when(req.getActionType()).thenReturn(ActionType.DELETE); // any non-ADD becomes subtract in your code
+        when(req.getActionType()).thenReturn(ActionType.DELETE);
         when(req.getTrainingDuration()).thenReturn(999);
 
-        TrainerSummary existingTrainer = new TrainerSummary();
+        // lenient stubs
+        lenient().when(req.getTrainerFirstName()).thenReturn("John");
+        lenient().when(req.getTrainerLastName()).thenReturn("Doe");
+        lenient().when(req.getIsActive()).thenReturn(true);
+
+        TrainerTrainingSummary existingTrainer = new TrainerTrainingSummary();
         existingTrainer.setUsername("john");
+        existingTrainer.setFirstName("John");
+        existingTrainer.setLastName("Doe");
+        existingTrainer.setActive(true);
 
-        TrainerSummary savedTrainer = new TrainerSummary();
-        savedTrainer.setUsername("john");
+        TrainingYearSummary yearSummary = new TrainingYearSummary();
+        yearSummary.setYear(2026);
+        TrainingMonthSummary monthSummary = new TrainingMonthSummary();
+        monthSummary.setMonth(3);
+        monthSummary.setTrainingsSummaryDuration(10L);
+        yearSummary.getMonths().add(monthSummary);
+        existingTrainer.getYears().add(yearSummary);
+
         when(trainerRepository.findByUsername("john")).thenReturn(Optional.of(existingTrainer));
-        when(trainerRepository.save(any(TrainerSummary.class))).thenReturn(savedTrainer);
-
-        TrainerMonthlyWorkload existingMonthly = new TrainerMonthlyWorkload();
-        existingMonthly.setTrainer(savedTrainer);
-        existingMonthly.setYear(2026);
-        existingMonthly.setMonth(3);
-        existingMonthly.setTotalDuration(10);
-
-        when(monthlyRepository.findByTrainerAndYearAndMonth(savedTrainer, 2026, 3))
-                .thenReturn(Optional.of(existingMonthly));
+        when(trainerRepository.save(any(TrainerTrainingSummary.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
 
         // when
         service.applyEvent(req);
 
         // then
-        verify(monthlyRepository).save(monthlyCaptor.capture());
-        assertEquals(0, monthlyCaptor.getValue().getTotalDuration());
+        verify(trainerRepository).save(trainerCaptor.capture());
+        TrainerTrainingSummary savedTrainer = trainerCaptor.getValue();
 
-        verifyNoMoreInteractions(trainerRepository, monthlyRepository);
+        TrainingYearSummary savedYear = savedTrainer.getYears().stream()
+                .filter(y -> y.getYear() == 2026)
+                .findFirst().orElseThrow();
+        TrainingMonthSummary savedMonth = savedYear.getMonths().stream()
+                .filter(m -> m.getMonth() == 3)
+                .findFirst().orElseThrow();
+
+        assertEquals(0L, savedMonth.getTrainingsSummaryDuration());
     }
 }

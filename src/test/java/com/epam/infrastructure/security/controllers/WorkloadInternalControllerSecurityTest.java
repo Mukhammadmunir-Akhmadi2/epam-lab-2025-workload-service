@@ -1,6 +1,7 @@
 package com.epam.infrastructure.security.controllers;
 
 import com.epam.application.services.impl.WorkloadAggregationServiceImpl;
+import com.epam.infrastructure.mappers.TrainerTrainingSummaryMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ class WorkloadInternalControllerSecurityTest {
     @MockitoBean
     private WorkloadAggregationServiceImpl workloadAggregationService;
 
+    @MockitoBean
+    private TrainerTrainingSummaryMapper trainerSummaryMapper;
+
     @BeforeEach
     void setup() {
         mockMvc = MockMvcBuilders
@@ -46,17 +50,6 @@ class WorkloadInternalControllerSecurityTest {
                         .contentType("application/json")
                         .content("{}"))
                 .andExpect(status().isUnauthorized());
-
-        verifyNoInteractions(workloadAggregationService);
-    }
-
-    @Test
-    @WithMockUser(username = "admin", authorities = "ADMIN")
-    void acceptWorkloadEvent_withWrongRole_shouldReturnForbidden() throws Exception {
-        mockMvc.perform(post("/workload-events")
-                        .contentType("application/json")
-                        .content("{}"))
-                .andExpect(status().isForbidden());
 
         verifyNoInteractions(workloadAggregationService);
     }

@@ -1,6 +1,6 @@
 package com.epam.infrastructure.controllers;
 
-import com.epam.infrastructure.dtos.TrainerMonthlySummaryResponseDto;
+import com.epam.infrastructure.dtos.TrainerTrainingSummaryResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,7 +38,7 @@ public interface WorkloadController {
                     @ApiResponse(responseCode = "404", description = "Trainer not found")
             }
     )
-    ResponseEntity<TrainerMonthlySummaryResponseDto> getTrainerWorkloadSummary(
+    ResponseEntity<TrainerTrainingSummaryResponseDto> getTrainerWorkloadSummary(
             @PathVariable String username
     );
 }
