@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Log4j2
@@ -21,7 +20,6 @@ public class WorkloadAggregationServiceImpl implements WorkloadAggregationServic
     private final TrainerSummaryRepository trainerRepository;
 
     @Override
-    @Transactional
     @PreAuthorize("hasAuthority('SYSTEM')")
     public void applyEvent(TrainerWorkloadRequestDto req) {
 

@@ -10,5 +10,4 @@ import java.util.UUID;
 @Repository
 public interface TrainerSummaryDocumentRepository extends MongoRepository<TrainerTrainingSummaryDao, UUID> {
     Optional<TrainerTrainingSummaryDao> findByUsername(String username);
-
 }
