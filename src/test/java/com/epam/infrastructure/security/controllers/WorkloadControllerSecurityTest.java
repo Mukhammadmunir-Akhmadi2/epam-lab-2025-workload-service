@@ -2,7 +2,7 @@ package com.epam.infrastructure.security.controllers;
 
 import com.epam.application.exceptions.ResourceNotFoundException;
 import com.epam.application.services.impl.WorkloadQueryServiceImpl;
-import com.epam.infrastructure.dtos.TrainerMonthlySummaryResponseDto;
+import com.epam.model.TrainerTrainingSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -61,22 +63,22 @@ class WorkloadControllerSecurityTest {
     @Test
     @WithMockUser(username = "admin", authorities = "ADMIN")
     void getWorkload_withAdmin_shouldReturnOk() throws Exception {
-        TrainerMonthlySummaryResponseDto dto = new TrainerMonthlySummaryResponseDto();
-        dto.setTrainerUsername("john");
-        dto.setTrainerFirstName("John");
-        dto.setTrainerLastName("Doe");
-        dto.setTrainerStatus(true);
-        dto.setYears(java.util.List.of());
+        TrainerTrainingSummary dto = new TrainerTrainingSummary();
+        dto.setUsername("john");
+        dto.setFirstName("John");
+        dto.setLastName("Doe");
+        dto.setStatus(true);
+        dto.setYears(Set.of());
 
         when(queryService.getSummary("john")).thenReturn(dto);
 
         mockMvc.perform(get("/trainers/john/workload"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
-                .andExpect(jsonPath("$.trainerUsername").value("john"))
-                .andExpect(jsonPath("$.trainerFirstName").value("John"))
-                .andExpect(jsonPath("$.trainerLastName").value("Doe"))
-                .andExpect(jsonPath("$.trainerStatus").value(true))
+                .andExpect(jsonPath("$.username").value("john"))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.status").value(true))
                 .andExpect(jsonPath("$.years").isArray());
 
         verify(queryService).getSummary("john");

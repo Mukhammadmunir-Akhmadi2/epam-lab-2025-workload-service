@@ -1,20 +1,20 @@
 package com.epam.infrastructure.health;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DatabaseHealthIndicator implements HealthIndicator {
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public Health health() {
         try {
-            entityManager.createNativeQuery("SELECT 1").getSingleResult();
+            mongoTemplate.executeCommand("{ ping: 1 }");
             return Health.up()
                     .withDetail("database", "reachable")
                     .build();
