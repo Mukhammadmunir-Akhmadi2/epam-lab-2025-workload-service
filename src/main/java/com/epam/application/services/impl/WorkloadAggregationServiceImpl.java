@@ -85,6 +85,7 @@ public class WorkloadAggregationServiceImpl implements WorkloadAggregationServic
         trainingSummary.setFirstName(req.getTrainerFirstName());
         trainingSummary.setLastName(req.getTrainerLastName());
         trainingSummary.setActive(req.getIsActive());
+        trainingSummary.setStatus(req.getIsActive());
 
         return trainingSummary;
     }

@@ -11,6 +11,15 @@ spring:
     database: gym_workload_db-test
     representation:
       uuid: standard
+  kafka:
+    listener:
+      auto-startup: false
+
+app:
+  kafka:
+    topics:
+      workload-events: trainer.workload.events.test
+      workload-events-dlq: trainer.workload.events.dlq.test
 
 logging:
   level:

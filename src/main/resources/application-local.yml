@@ -12,6 +12,12 @@ spring:
     representation:
       uuid: standard
 
+app:
+  kafka:
+    topics:
+      workload-events: trainer.workload.events
+      workload-events-dlq: trainer.workload.events.dlq
+
 logging:
   level:
     root: info
