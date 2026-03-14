@@ -2,8 +2,23 @@ spring:
   config:
     activate:
       on-profile: stg
+  data:
+    mongodb:
+      auto-index-creation: true
+  mongodb:
+    uri: mongodb://localhost
+    port: 27017
+    database: gym_workload_db-test
+    representation:
+      uuid: standard
+
+app:
+  kafka:
+    topics:
+      workload-events: trainer.workload.events.test
+      workload-events-dlq: trainer.workload.events.dlq.test
 
 logging:
   level:
-    root: warn
-    org.springframework.security: warn
+    root: info
+    org.springframework.security: info
