@@ -6,6 +6,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
@@ -13,6 +14,7 @@ import org.springframework.messaging.handler.annotation.support.MethodArgumentNo
 import org.springframework.util.backoff.FixedBackOff;
 
 @Configuration
+@Profile({"local", "stg", "test", "prod"})
 public class KafkaConsumerErrorConfig {
 
     @Bean

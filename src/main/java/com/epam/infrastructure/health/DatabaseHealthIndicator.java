@@ -3,11 +3,13 @@ package com.epam.infrastructure.health;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Profile({"local", "stg", "test", "prod"})
 public class DatabaseHealthIndicator implements HealthIndicator {
     private final MongoTemplate mongoTemplate;
 

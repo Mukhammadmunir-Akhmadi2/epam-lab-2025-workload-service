@@ -6,9 +6,9 @@ spring:
     mongodb:
       auto-index-creation: true
   mongodb:
-    uri: mongodb://localhost
-    port: 27017
-    database: gym_workload_db-test
+    uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost}
+    port: ${SPRING_DATA_MONGODB_PORT:27017}
+    database: ${SPRING_DATA_MONGODB_DATABASE:gym_workload_db-test}
     representation:
       uuid: standard
   kafka:

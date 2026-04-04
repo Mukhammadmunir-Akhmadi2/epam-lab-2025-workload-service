@@ -5,12 +5,14 @@ import com.epam.infrastructure.mappers.TrainerTrainingSummaryMapper;
 import com.epam.infrastructure.persistence.TrainerSummaryDocumentRepository;
 import com.epam.model.TrainerTrainingSummary;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Profile({"local", "stg", "test", "prod"})
 public class TrainerSummaryRepositoryImpl implements TrainerSummaryRepository {
 
     private final TrainerSummaryDocumentRepository docRepo;

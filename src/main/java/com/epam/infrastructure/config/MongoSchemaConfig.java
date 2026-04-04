@@ -5,6 +5,7 @@ import com.mongodb.client.model.ValidationLevel;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Range;
 import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.schema.MongoJsonSchema;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile({"local", "stg", "test", "prod"})
 public class MongoSchemaConfig {
 
     private final MongoTemplate mongoTemplate;

@@ -3,7 +3,16 @@ spring:
     activate:
       on-profile: dev
 
+app:
+  dev:
+    storage:
+      path: ${DATA_FOLDER:src/main/resources/data/trainer-summaries.json}
+
 logging:
   level:
     root: info
     org.springframework.security: debug
+
+eureka:
+  client:
+    enabled: false
